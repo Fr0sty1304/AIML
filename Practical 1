@@ -1,0 +1,95 @@
+
+# # PR1: Intelligent Agents and PEAS Representation
+# # Application: Smart Home Temperature Controller
+
+# # 1. PEAS Representation
+# peas = {
+#     "Performance Measure": "Comfortable temperature and energy efficiency",
+#     "Environment": "Room or house",
+#     "Actuators": ["Air Conditioner", "Heater"],
+#     "Sensors": ["Temperature Sensor"]
+# }
+
+# print("========== PEAS REPRESENTATION ==========")
+
+# for component, description in peas.items():
+#     print(component, ":", description)
+
+
+# # 2. Sensor: Read the room temperature
+# def read_temperature():
+#     temperature = float(input("\nEnter room temperature (Celsius): "))
+#     return temperature
+
+
+# # 3. Intelligent Agent: Decide the required action
+# def smart_home_agent(temperature):
+#     if temperature > 28:
+#         action = "Turn ON Air Conditioner"
+#         message = "Room is too hot."
+
+#     elif temperature < 18:
+#         action = "Turn ON Heater"
+#         message = "Room is too cold."
+
+#     else:
+#         action = "No action required"
+#         message = "Room temperature is comfortable."
+
+#     return action, message
+
+
+# # 4. Actuator: Execute the selected action
+# def control_device(action):
+#     print("Actuator Status:", action)
+
+
+# # 5. Performance Evaluation
+# def evaluate_performance(temperature):
+#     if 18 <= temperature <= 28:
+#         print("Performance: Target temperature range achieved.")
+#     else:
+#         print("Performance: Temperature adjustment required.")
+
+
+# # 6. Main Program
+# print("\n========== SMART HOME AGENT ==========")
+
+# temperature = read_temperature()
+
+# action, message = smart_home_agent(temperature)
+
+# print("\nRoom Temperature:", temperature, "Celsius")
+# print("Agent Decision:", message)
+
+# control_device(action)
+
+# evaluate_performance(temperature)
+
+
+
+
+temperature = float(input("Enter room temperature: "))
+light = input("Is it dark? (yes/no): ")
+motion = input("Is anyone in the room? (yes/no): ")
+door = input("Is the door open? (yes/no): ")
+
+if temperature > 28:
+    print("Turn ON Air Conditioner")
+elif temperature < 18:
+    print("Turn ON Heater")
+else:
+    print("Temperature is comfortable")
+
+if light == "yes" and motion == "yes":
+    print("Turn ON Lights")
+else:
+    print("Turn OFF Lights")
+
+if motion == "no":
+    print("Room is empty. Save energy")
+
+if door == "yes":
+    print("Door is open")
+else:
+    print("Door is closed")
