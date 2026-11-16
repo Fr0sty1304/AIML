@@ -1,0 +1,49 @@
+# PR4: Rule-Based Expert System
+# Algorithm:
+# 1. Store the initial facts and rules.
+# 2. Forward chaining derives new facts from existing facts.
+# 3. Backward chaining checks whether a goal can be proved.
+
+facts = {"raining"}
+
+rules = {
+    "ground_wet": ["raining"],
+    "ground_slippery": ["ground_wet"]
+}
+
+def forward_chaining(facts, rules):
+    facts = set(facts)
+
+    for conclusion, conditions in rules.items():
+        if all(condition in facts for condition in conditions):
+            facts.add(conclusion)
+            print("Derived:", conclusion)
+
+    return facts
+
+def backward_chaining(goal, facts, rules):
+    if goal in facts:
+        return True
+
+    if goal not in rules:
+        return False
+
+    for condition in rules[goal]:
+        if not backward_chaining(condition, facts, rules):
+            return False
+
+    return True
+
+print("Initial Fact: It is raining")
+
+print("\nForward Chaining:")
+all_facts = forward_chaining(facts, rules)
+print("Final Facts:", all_facts)
+
+print("\nBackward Chaining:")
+goal = "ground_slippery"
+
+if backward_chaining(goal, facts, rules):
+    print("Goal proved: Ground is slippery")
+else:
+    print("Goal cannot be proved")
