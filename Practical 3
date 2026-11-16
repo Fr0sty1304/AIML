@@ -1,0 +1,61 @@
+# PR3(b): A* Search Algorithm
+# Algorithm:
+# 1. Start from the initial position.
+# 2. Calculate f(n) = g(n) + h(n).
+# 3. Select the position with the lowest f(n).
+# 4. Add unvisited neighboring positions to the queue.
+# 5. Repeat until the goal is reached.
+
+import heapq
+
+maze = [
+    [0, 0, 0, 1, 0],
+    [1, 0, 0, 1, 0],
+    [0, 0, 0, 0, 0],
+    [0, 1, 1, 1, 0],
+    [0, 0, 0, 0, 0]
+]
+
+start = (0, 0)
+goal = (4, 4)
+
+def heuristic(position):
+    return abs(position[0] - goal[0]) + abs(position[1] - goal[1])
+
+def a_star(start, goal):
+    queue = [(heuristic(start), [start])]
+    visited = []
+
+    while queue:
+        queue.sort(reverse=True)
+        cost, path = queue.pop()
+        row, col = path[-1]
+
+        if (row, col) == goal:
+            return path
+
+        if (row, col) not in visited:
+            visited.append((row, col))
+
+            neighbors = [
+                (row - 1, col),
+                (row + 1, col),
+                (row, col - 1),
+                (row, col + 1)
+            ]
+
+            for r, c in neighbors:
+                if 0 <= r < 5 and 0 <= c < 5:
+                    if maze[r][c] == 0 and (r, c) not in visited:
+                        new_path = path + [(r, c)]
+                        cost = len(new_path) - 1 + heuristic((r, c))
+                        queue.append((cost, new_path))
+
+    return []
+
+print("A* SEARCH")
+
+path = a_star(start, goal)
+
+print("Path:", path)
+print("Path Length:", len(path) - 1)
