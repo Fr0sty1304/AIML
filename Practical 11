@@ -1,0 +1,50 @@
+import pandas as pd
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split, cross_val_score, GridSearchCV
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
+
+# Load and split
+X, y = load_breast_cancer(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+# Models and hyperparameter grids (SVM needs scaling, so it uses a pipeline)
+models = {
+    "SVM": (
+        make_pipeline(StandardScaler(), SVC()),
+        {"svc__C": [0.1, 1, 10], "svc__kernel": ["linear", "rbf"], "svc__gamma": ["scale", 0.01]},
+    ),
+    "Random Forest": (
+        RandomForestClassifier(random_state=42),
+        {"n_estimators": [50, 100, 200], "max_depth": [None, 5, 10]},
+    ),
+    "AdaBoost": (
+        AdaBoostClassifier(random_state=42),
+        {"n_estimators": [50, 100, 200], "learning_rate": [0.1, 0.5, 1.0]},
+    ),
+}
+
+results = []
+for name, (model, grid) in models.items():
+    # Before optimization: default parameters
+    cv_before = cross_val_score(model, X_train, y_train, cv=5).mean()
+    test_before = model.fit(X_train, y_train).score(X_test, y_test)
+
+    # After optimization: Grid Search with 5-fold CV
+    gs = GridSearchCV(model, grid, cv=5).fit(X_train, y_train)
+    test_after = gs.score(X_test, y_test)
+
+    print(f"{name} best params: {gs.best_params_}")
+    results.append({
+        "Model": name,
+        "CV Acc (before)": cv_before,
+        "Test Acc (before)": test_before,
+        "CV Acc (after)": gs.best_score_,
+        "Test Acc (after)": test_after,
+    })
+
+print("\n", pd.DataFrame(results).round(4).to_string(index=False))
