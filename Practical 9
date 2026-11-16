@@ -1,0 +1,37 @@
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_wine
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans, AgglomerativeClustering
+from sklearn.metrics import silhouette_score
+from scipy.cluster.hierarchy import linkage, dendrogram
+
+# Load and scale data
+data = load_wine(as_frame=True)
+X = StandardScaler().fit_transform(data.data)
+
+# Elbow Method (K-Means) and Dendrogram (Hierarchical)
+ks = range(1, 11)
+inertia = [KMeans(n_clusters=k, n_init=10, random_state=42).fit(X).inertia_ for k in ks]
+
+fig, ax = plt.subplots(1, 2, figsize=(12, 4))
+ax[0].plot(ks, inertia, marker="o")
+ax[0].set(title="Elbow Method", xlabel="Number of clusters (k)", ylabel="Inertia")
+dendrogram(linkage(X, method="ward"), ax=ax[1], no_labels=True)
+ax[1].set(title="Dendrogram (Ward linkage)", ylabel="Distance")
+plt.tight_layout()
+plt.show()
+
+# Fit both models with the k chosen from the plots (elbow and dendrogram point to 3)
+k = 3
+km_labels = KMeans(n_clusters=k, n_init=10, random_state=42).fit_predict(X)
+hc_labels = AgglomerativeClustering(n_clusters=k, linkage="ward").fit_predict(X)
+
+print("Silhouette Score - K-Means:", round(silhouette_score(X, km_labels), 4))
+print("Silhouette Score - Hierarchical:", round(silhouette_score(X, hc_labels), 4))
+
+# Analyze clusters: average value of key features per cluster
+df = data.data.copy()
+df["KMeans_Cluster"] = km_labels
+print("\nCluster sizes:\n", df["KMeans_Cluster"].value_counts().sort_index())
+print("\nCluster profiles (mean values):")
+print(df.groupby("KMeans_Cluster")[["alcohol", "flavanoids", "color_intensity", "proline"]].mean().round(2))
