@@ -1,0 +1,44 @@
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, f1_score
+
+# Load, split and scale (fit scaler and PCA on training data only)
+X, y = load_breast_cancer(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# PCA keeping 95% of the variance
+pca = PCA(n_components=0.95)
+X_train_pca = pca.fit_transform(X_train)
+X_test_pca = pca.transform(X_test)
+
+print("Features before PCA:", X_train.shape[1])
+print("Features after PCA: ", X_train_pca.shape[1])
+print("Variance explained: ", round(pca.explained_variance_ratio_.sum(), 4))
+
+# Impact on classification
+datasets = {
+    "Original features": (X_train, X_test),
+    "PCA features": (X_train_pca, X_test_pca),
+}
+for name, (tr, te) in datasets.items():
+    pred = LogisticRegression(max_iter=1000).fit(tr, y_train).predict(te)
+    print(f"{name:18s} Accuracy: {accuracy_score(y_test, pred):.4f}  "
+          f"F1: {f1_score(y_test, pred):.4f}")
+
+# Visualization of the first 2 principal components
+pca2 = PCA(n_components=2).fit(X_train)
+X2 = pca2.transform(X_train)
+plt.scatter(X2[:, 0], X2[:, 1], c=y_train, cmap="coolwarm", alpha=0.7)
+plt.xlabel("Principal Component 1")
+plt.ylabel("Principal Component 2")
+plt.title("PCA - 2D Projection (0 = malignant, 1 = benign)")
+plt.show()
