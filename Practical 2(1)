@@ -1,0 +1,43 @@
+maze = [
+    [0, 0, 0, 1, 0],
+    [1, 0, 0, 1, 0],
+    [0, 0, 0, 0, 0],
+    [0, 1, 1, 1, 0],
+    [0, 0, 0, 0, 0]
+]
+
+start = (0, 0)
+goal = (4, 4)
+
+def dfs(start, goal):
+    stack = [[start]]
+    visited = [start]
+
+    while stack:
+        path = stack.pop()
+        row, col = path[-1]
+
+        if (row, col) == goal:
+            return path
+
+        neighbors = [
+            (row - 1, col),
+            (row + 1, col),
+            (row, col - 1),
+            (row, col + 1)
+        ]
+
+        for r, c in neighbors:
+            if 0 <= r < 5 and 0 <= c < 5:
+                if maze[r][c] == 0 and (r, c) not in visited:
+                    visited.append((r, c))
+                    stack.append(path + [(r, c)])
+
+    return []
+
+print("DEPTH FIRST SEARCH")
+
+path = dfs(start, goal)
+
+print("Path:", path)
+print("Path Length:", len(path) - 1)
