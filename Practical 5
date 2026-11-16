@@ -1,0 +1,82 @@
+# PR: Data Preprocessing and Exploratory Data Analysis
+# Dataset: Titanic Dataset
+
+# 1. Import Libraries
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+
+# 2. Download Dataset
+url = "https://raw.githubusercontent.com/datasciencedojo/datasets/master/titanic.csv"
+try:
+    df = pd.read_csv(url)
+except Exception:
+    df = pd.read_csv("titanic.csv")  # local fallback if offline
+
+print("Original Dataset:")
+print(df.head())
+
+# 3. Data Cleaning
+# Drop ID-like columns FIRST, otherwise PassengerId makes every row unique
+df = df.drop(columns=['PassengerId', 'Name', 'Ticket', 'Cabin'])
+df = df.drop_duplicates().reset_index(drop=True)
+
+# 4. Missing Value Handling
+# Embarked: only 2 missing values, filled with the mode (negligible leakage)
+df['Embarked'] = df['Embarked'].fillna(df['Embarked'].mode()[0])
+# Age is imputed AFTER the split, using training data only (see step 9)
+
+# 5. Encoding Techniques
+le = LabelEncoder()
+df['Sex'] = le.fit_transform(df['Sex'])
+df = pd.get_dummies(df, columns=['Embarked'], drop_first=True, dtype=int)
+
+# 6. Statistical Analysis (exploratory, on the full data)
+print("\nMissing Values:")
+print(df.isnull().sum())
+print("\nStatistical Analysis:")
+print(df.describe())
+
+# 7. Data Visualization
+df['Age'].hist(bins=30)
+plt.title("Age Histogram")
+plt.xlabel("Age")
+plt.ylabel("Frequency")
+plt.show()
+
+plt.boxplot(df['Fare'])
+plt.title("Fare Boxplot")
+plt.ylabel("Fare")
+plt.show()
+
+# 8. Split Dataset into Training and Testing Sets (before imputing/scaling)
+X = df.drop('Survived', axis=1)
+y = df['Survived']
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+# 9. Impute Age using the TRAIN median only
+age_median = X_train['Age'].median()
+X_train = X_train.copy()
+X_test = X_test.copy()
+X_train['Age'] = X_train['Age'].fillna(age_median)
+X_test['Age'] = X_test['Age'].fillna(age_median)
+
+# 10. Feature Scaling: fit on train, transform both
+scaler = StandardScaler()
+cols = ['Age', 'Fare']
+X_train[cols] = scaler.fit_transform(X_train[cols])
+X_test[cols] = scaler.transform(X_test[cols])
+
+print("\nScaled Training Data:")
+print(X_train.head())
+
+print("\nTraining Data:", X_train.shape)
+print("Testing Data:", X_test.shape)
+print("Remaining missing values (train/test):",
+      X_train.isnull().sum().sum(), "/", X_test.isnull().sum().sum())
+
+print("\nData Preprocessing Completed Successfully!")
